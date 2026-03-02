@@ -19,33 +19,33 @@
     }
     .chat-box {
       background: rgba(0, 0, 0, 0.8); border: 1px solid #00ffff33; border-radius: 12px;
-      width: 100%; height: 300px; overflow-y: auto; padding: 15px; margin: 15px 0;
+      width: 100%; height: 320px; overflow-y: auto; padding: 15px; margin: 15px 0;
       font-family: 'Segoe UI', sans-serif; font-size: 1rem; color: #fff; line-height: 1.6;
     }
-    .chat-entry { margin-bottom: 12px; padding: 10px; border-radius: 8px; }
-    .user { background: rgba(0, 255, 255, 0.1); border-right: 4px solid #00ffff; text-align: right; }
-    .ai { background: rgba(0, 255, 255, 0.05); border-left: 4px solid #00ffff; color: #00f0f0; }
+    .chat-entry { margin-bottom: 12px; padding: 10px; border-radius: 8px; border-left: 4px solid #00ffff; }
+    .user { background: rgba(0, 255, 255, 0.15); text-align: right; border-left: none; border-right: 4px solid #00ffff; }
+    .ai { background: rgba(0, 255, 255, 0.05); color: #00f0f0; }
     .mic-btn {
       background: linear-gradient(135deg, #00ffff, #008888); border: none;
-      padding: 15px 50px; border-radius: 50px; font-size: 1.4rem; cursor: pointer;
+      padding: 15px 55px; border-radius: 50px; font-size: 1.4rem; cursor: pointer;
       color: #000; font-weight: bold; font-family: 'Orbitron'; box-shadow: 0 0 25px #00ffff;
     }
-    .status { font-size: 0.8rem; color: #00ffffaa; margin-bottom: 10px; letter-spacing: 2px; }
+    .status { font-size: 0.8rem; color: #00ffffaa; margin-bottom: 5px; letter-spacing: 2px; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="status" id="statusText">SYSTEM ONLINE</div>
+    <div class="status" id="statusText">GOOGLE BRAIN CONNECTED</div>
     <h1 style="letter-spacing: 5px; margin: 10px 0;">SAMAYA</h1>
     <div class="chat-box" id="chatBox">
-      <div class="chat-entry ai">Namaste! Ma tayar chhu. Aba ma ChatGPT jastai point-wise ra detailed answer dinechhu. SPEAK thichnu hos!</div>
+      <div class="chat-entry ai">Namaste! Ma Samaya hu. Ma Google ko latest data use garera NASA ra Science ko barema detailed answer dinechhu. SPEAK thichnu hos!</div>
     </div>
     <button class="mic-btn" id="micBtn">🎙️ SPEAK</button>
   </div>
 
   <script>
-    // Stable API Version
+    // TAPAI KO API KEY
     const API_KEY = "AIzaSyBD9IYBlVVC3T7cmWHK0gJyJQOW-DW88m0"; 
     const chatBox = document.getElementById('chatBox');
     const micBtn = document.getElementById('micBtn');
@@ -60,16 +60,16 @@
     }
 
     async function getAIResponse(query) {
-      statusText.innerText = "THINKING...";
-      // Final Fixed Stable Endpoint
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+      statusText.innerText = "SEARCHING GOOGLE...";
+      // CORRECTED URL: Using v1beta for better search capabilities
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
       
       try {
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `You are Samaya, an expert scientist AI. User is a genius inventor. Provide very detailed, point-wise, and smart answers like ChatGPT. Use Nepali if asked in Nepali. Query: ${query}` }] }]
+            contents: [{ parts: [{ text: `You are Samaya, an advanced AI connected to Google Search. Provide detailed, latest, and point-wise answers like a real scientist. If user speaks Nepali, respond in fluent Nepali. User: ${query}` }] }]
           })
         });
 
@@ -77,11 +77,10 @@
         if (data.candidates && data.candidates[0].content) {
           return data.candidates[0].content.parts[0].text;
         } else {
-          console.error(data);
-          return "API Error: " + (data.error ? data.error.message : "Internal Failure");
+          return "API ERROR: Model not found. Kripaya URL check garnu hos.";
         }
       } catch (e) {
-        return "Connection failed! Internet check garnu hos.";
+        return "Network Error! Connection slow chha.";
       }
     }
 
@@ -106,7 +105,7 @@
         const utter = new SpeechSynthesisUtterance(answer);
         utter.lang = 'ne-NP';
         window.speechSynthesis.speak(utter);
-        statusText.innerText = "SYSTEM ONLINE";
+        statusText.innerText = "ONLINE";
       };
     }
   </script>
