@@ -55,7 +55,7 @@
   </div>
 
   <script>
-    // Updated API Version: v1 (Stable)
+    // Stable v1 Endpoint
     const API_KEY = "AIzaSyBD9IYBlVVC3T7cmWHK0gJyJQOW-DW88m0";
     const chatBox = document.getElementById('chatBox');
     const micBtn = document.getElementById('micBtn');
@@ -71,7 +71,7 @@
 
     async function getAIResponse(query) {
       statusText.innerText = "THINKING...";
-      // Version v1 use gareko chha yaha
+      // Changed version to v1 for stability
       const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
       
       try {
@@ -88,11 +88,12 @@
         if (data.candidates && data.candidates[0].content) {
           return data.candidates[0].content.parts[0].text;
         } else if (data.error) {
+          console.error(data.error);
           return "API Error: " + data.error.message;
         }
-        return "Hmm, maile tyo bujhina. Kripaya feri vanna saknu hunchha?";
+        return "Maile tyo bujhina, feri vannu hos?";
       } catch (e) {
-        return "Connection failed! Internet ya API key check garnu hos.";
+        return "Connection failed! Check internet or API key.";
       }
     }
 
