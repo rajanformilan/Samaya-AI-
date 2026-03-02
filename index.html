@@ -1,54 +1,65 @@
 <!DOCTYPE html>
 <html lang="ne">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Samaya Smart AI</title>
-  <style>
-    body { background: #000; color: #00f0f0; font-family: sans-serif; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    #chat { width: 90%; max-width: 400px; height: 300px; border: 1px solid #00ffff; overflow-y: auto; padding: 10px; margin-bottom: 20px; text-align: left; background: rgba(0,255,255,0.05); }
-    button { background: #00ffff; color: #000; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samaya AI - Final Fix</title>
+    <style>
+        body { background: #000; color: #00f0f0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #chat { width: 90%; max-width: 450px; height: 400px; border: 2px solid #00ffff; border-radius: 15px; overflow-y: auto; padding: 15px; background: rgba(0, 255, 255, 0.05); box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); }
+        .msg { margin-bottom: 10px; padding: 8px; border-radius: 5px; }
+        .user { background: rgba(0, 255, 255, 0.1); text-align: right; border-right: 4px solid #00ffff; }
+        .ai { background: rgba(255, 255, 255, 0.05); border-left: 4px solid #00ffff; }
+        button { background: #00ffff; color: #000; border: none; padding: 15px 50px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 0 15px #00ffff; }
+    </style>
 </head>
 <body>
-  <h1>SAMAYA AI</h1>
-  <div id="chat">Samaya: Namaste! Aba ma sanchikai bolchhu. Sodhnu hos!</div>
-  <button id="btn">🎙️ SPEAK</button>
+    <h1>SAMAYA AI</h1>
+    <div id="chat"><div class="msg ai">Samaya: Namaste! Aba ma sanchikai bolchhu. Malai j pani sodhnu hos, chiya khaja dekhi space samma!</div></div>
+    <button id="btn">🎙️ SPEAK</button>
 
-  <script>
-    const API_KEY = "AIzaSyBD9IYBlVVC3T7cmWHK0gJyJQOW-DW88m0"; 
-    const btn = document.getElementById('btn');
-    const chat = document.getElementById('chat');
+    <script>
+        const API_KEY = "AIzaSyBD9IYBlVVC3T7cmWHK0gJyJQOW-DW88m0";
+        const btn = document.getElementById('btn');
+        const chat = document.getElementById('chat');
 
-    async function askAI(query) {
-      chat.innerHTML += `<p style="color:#fff">You: ${query}</p>`;
-      // FIXED ENDPOINT: v1beta models/gemini-1.5-flash
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-      
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: "Explain in detail like a scientist in Nepali: " + query }] }] })
-        });
-        const data = await res.json();
-        const reply = data.candidates[0].content.parts[0].text;
-        chat.innerHTML += `<p>Samaya: ${reply}</p>`;
-        chat.scrollTop = chat.scrollHeight;
-        
-        // Voice
-        const speech = new SpeechSynthesisUtterance(reply);
-        speech.lang = 'ne-NP';
-        window.speechSynthesis.speak(speech);
-      } catch (e) {
-        chat.innerHTML += `<p style="color:red">Error: URL ya Key mileko chhaina.</p>`;
-      }
-    }
+        async function askAI(query) {
+            chat.innerHTML += `<div class="msg user">You: ${query}</div>`;
+            chat.scrollTop = chat.scrollHeight;
 
-    const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    rec.lang = 'ne-NP';
-    btn.onclick = () => { rec.start(); chat.innerHTML += `<p><i>Sundaichhu...</i></p>`; };
-    rec.onresult = (e) => askAI(e.results[0][0].transcript);
-  </script>
+            // CORRECT URL: Google Gemini 1.5 Flash using v1
+            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `You are Samaya, a friendly and smart AI. Answer like a close friend. If the user asks about daily things like 'chiya khayo' or 'khaja khayo', reply playfully in Nepali. If they ask about travel, give smart advice. User query: ${query}` }] }]
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.candidates && data.candidates[0].content) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    chat.innerHTML += `<div class="msg ai">Samaya: ${reply}</div>`;
+                    
+                    const speech = new SpeechSynthesisUtterance(reply);
+                    speech.lang = 'ne-NP';
+                    window.speechSynthesis.speak(speech);
+                } else {
+                    chat.innerHTML += `<div class="msg ai" style="color:red">Samaya: Oops! System ma sano error aayo.</div>`;
+                }
+            } catch (e) {
+                chat.innerHTML += `<div class="msg ai" style="color:red">Samaya: Connection failed! Key check garnu hos.</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.lang = 'ne-NP';
+        btn.onclick = () => { window.speechSynthesis.cancel(); rec.start(); };
+        rec.onresult = (e) => askAI(e.results[0][0].transcript);
+    </script>
 </body>
 </html>
