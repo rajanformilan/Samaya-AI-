@@ -2,7 +2,7 @@
 <html lang="ne">
 <head>
   <meta charset="UTF-8" />
-  <title>Samaya AI - Final Fix</title>
+  <title>Samaya AI - Final Smart Fix</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
@@ -19,30 +19,32 @@
     .chat-box {
       background: rgba(0, 0, 0, 0.8); border: 1px solid #00ffff33; border-radius: 12px;
       height: 250px; overflow-y: auto; padding: 15px; margin: 20px 0;
-      font-family: sans-serif; text-align: left;
+      font-family: 'Segoe UI', sans-serif; text-align: left; line-height: 1.5;
     }
-    .chat-entry { margin-bottom: 10px; padding: 10px; border-radius: 8px; }
-    .user { background: rgba(0, 255, 255, 0.1); border-right: 4px solid #00ffff; }
-    .ai { background: rgba(0, 255, 255, 0.05); border-left: 4px solid #00ffff; }
+    .chat-entry { margin-bottom: 12px; padding: 10px; border-radius: 8px; }
+    .user { background: rgba(0, 255, 255, 0.1); border-right: 4px solid #00ffff; color: #fff; }
+    .ai { background: rgba(0, 255, 255, 0.05); border-left: 4px solid #00ffff; color: #00f0f0; }
     .mic-btn {
       background: linear-gradient(135deg, #00ffff, #008888); border: none;
-      padding: 15px 40px; border-radius: 50px; font-size: 1.2rem; cursor: pointer;
+      padding: 15px 45px; border-radius: 50px; font-size: 1.3rem; cursor: pointer;
       font-weight: bold; font-family: 'Orbitron'; box-shadow: 0 0 20px #00ffff;
     }
-    .status { font-size: 0.8rem; color: #00ffffaa; margin-bottom: 5px; }
+    .status { font-size: 0.8rem; color: #00ffffaa; margin-bottom: 10px; text-transform: uppercase; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="status" id="statusText">SYSTEM ONLINE</div>
-    <h1 style="letter-spacing: 5px;">SAMAYA</h1>
-    <div class="chat-box" id="chatBox"></div>
+    <div class="status" id="statusText">SYSTEM READY</div>
+    <h1 style="letter-spacing: 5px; margin: 10px 0;">SAMAYA</h1>
+    <div class="chat-box" id="chatBox">
+        <div class="chat-entry ai">Ma tayar chhu! Sodhnu hos, ma NASA ya science ko barema sabai jankari ChatGPT jastai dinechhu.</div>
+    </div>
     <button class="mic-btn" id="micBtn">🎙️ SPEAK</button>
   </div>
 
   <script>
-    // TAPAI KO API KEY
+    // TAPAI KO KEY
     const API_KEY = "AIzaSyBD9IYBlVVC3T7cmWHK0gJyJQOW-DW88m0"; 
     const chatBox = document.getElementById('chatBox');
     const micBtn = document.getElementById('micBtn');
@@ -58,26 +60,29 @@
 
     async function getAIResponse(query) {
       statusText.innerText = "THINKING...";
-      // FINAL FIXED URL PATH
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+      // CORRECTED URL FOR v1 STABLE
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
       
       try {
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `You are Samaya, a brilliant scientist. Give detailed answers like ChatGPT. Use Nepali if asked in Nepali. Question: ${query}` }] }]
+            contents: [{ parts: [{ text: `You are Samaya, a brilliant scientist. Answer like ChatGPT. Give detailed points. Use Nepali if user speaks Nepali. User Query: ${query}` }] }]
           })
         });
 
         const data = await response.json();
+        
+        // Extracting data correctly
         if (data.candidates && data.candidates[0].content) {
           return data.candidates[0].content.parts[0].text;
         } else {
-          return "API Error: " + (data.error ? data.error.message : "Something went wrong");
+          console.error(data);
+          return "Galti bhayo: " + (data.error ? data.error.message : "Internal Error");
         }
       } catch (e) {
-        return "Connection Error! Check internet.";
+        return "Network Error! Check internet.";
       }
     }
 
@@ -86,7 +91,11 @@
       const rec = new Recognition();
       rec.lang = 'ne-NP';
 
-      micBtn.onclick = () => { rec.start(); statusText.innerText = "LISTENING..."; };
+      micBtn.onclick = () => { 
+        window.speechSynthesis.cancel();
+        rec.start(); 
+        statusText.innerText = "LISTENING..."; 
+      };
 
       rec.onresult = async (e) => {
         const query = e.results[0][0].transcript;
