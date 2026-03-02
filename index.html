@@ -1,24 +1,115 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="ne">
 <head>
   <meta charset="UTF-8" />
   <title>Samaya - Human AI Assistant</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-   <link rel="stylesheet" href="styles.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #000a1a, #000014);
+      color: #00f0f0;
+      font-family: 'Orbitron', sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; overflow: hidden; user-select: none;
+    }
+    .container {
+      background: rgba(0, 255, 255, 0.1);
+      border: 2px solid #00ffff88;
+      border-radius: 15px; width: 95vw; max-width: 700px;
+      padding: 25px 30px; box-shadow: 0 0 30px #00ffffaa;
+      display: flex; flex-direction: column; align-items: center; position: relative;
+    }
+    .ai-image {
+      width: 220px; height: 220px; border-radius: 50%; overflow: hidden;
+      border: 5px solid #00ffffcc; box-shadow: 0 0 40px #00ffffcc;
+      animation: glowPulse 3s ease-in-out infinite; position: relative;
+    }
+    .ai-image img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 40px #00ffffcc; }
+      50% { box-shadow: 0 0 60px #00ffffee; }
+    }
+    .ai-name { margin: 18px 0 15px 0; font-size: 2.8rem; text-shadow: 0 0 15px #00ffffbb; letter-spacing: 0.12em; }
+    .chat-box {
+      background: rgba(0, 255, 255, 0.08); border: 1.5px solid #00ffff99;
+      border-radius: 15px; width: 100%; min-height: 160px; max-height: 300px;
+      padding: 15px 20px; overflow-y: auto; font-size: 1.15rem; line-height: 1.6;
+      box-shadow: inset 0 0 10px #00ffff99; color: #e0f7f7; user-select: text;
+    }
+    .chat-entry { margin-bottom: 14px; padding: 10px; border-radius: 12px; max-width: 90%; }
+    .chat-entry.user { background: #00ffffaa; color: #004d4d; align-self: flex-end; font-weight: 600; }
+    .chat-entry.ai { background: #00262dcc; color: #00ffffee; border: 1px solid #00ffffcc; }
+    .mic-btn {
+      margin-top: 22px; background: linear-gradient(135deg, #00ffffcc, #00aaffcc);
+      border: none; padding: 14px 38px; border-radius: 40px; font-size: 1.5rem;
+      cursor: pointer; color: #004d4d; font-weight: 800; box-shadow: 0 0 30px #00ffffcc;
+    }
+    .status { position: absolute; top: 15px; right: 18px; font-size: 0.8rem; color: #00ffffaa; }
+  </style>
 </head>
 <body>
+
   <div class="container">
+    <div class="status" id="statusText">🎙️ Ready</div>
     <div class="ai-image">
-      <img src="images.jpg" alt="Samaya" />
+      <img src="images.jpg" alt="Samaya" id="samayaImg" />
     </div>
     <div class="ai-name">SAMAYA</div>
-    <div class="chat-box" id="chatBox" aria-live="polite" aria-atomic="true">👋 Tap the mic and speak to Samaya...</div>
-    <div class="btn-container">
-      <button class="mic-btn" id="micBtn" aria-label="Speak to Samaya">🎙️ Speak</button>
-      <button class="stop-btn" id="stopBtn" aria-label="Stop Listening" style="display:none;">⏹️ Stop</button>
-    </div>
-    <div class="status" id="statusText">🎙️ Ready</div>
+    <div class="chat-box" id="chatBox"></div>
+    <button class="mic-btn" id="micBtn">🎙️ SPEAK</button>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    const GEMINI_API_KEY = "AIzaSyBD9IYBlVVC3T7cmWHK0gJyJQOW-DW88m0"; // Tapai ko key yaha chha
+    const chatBox = document.getElementById('chatBox');
+    const micBtn = document.getElementById('micBtn');
+    const statusText = document.getElementById('statusText');
+
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = new SpeechRecognition();
+    recognition.lang = 'ne-NP'; // Nepali Support
+
+    function addChatEntry(text, sender) {
+      const entry = document.createElement('div');
+      entry.className = 'chat-entry ' + sender;
+      entry.textContent = (sender === 'user' ? 'You: ' : 'Samaya: ') + text;
+      chatBox.appendChild(entry);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function getAIResponse(userInput) {
+      statusText.textContent = "🤔 Thinking...";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ contents: [{ parts: [{ text: userInput }] }] })
+        });
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+      } catch (e) { return "Sorry, I am offline."; }
+    }
+
+    function speak(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'ne-NP'; // Nepali voice support
+      window.speechSynthesis.speak(utter);
+    }
+
+    micBtn.onclick = () => { recognition.start(); statusText.textContent = "🎧 Listening..."; };
+
+    recognition.onresult = async (event) => {
+      const text = event.results[0][0].transcript;
+      addChatEntry(text, 'user');
+      const reply = await getAIResponse(text);
+      addChatEntry(reply, 'ai');
+      speak(reply);
+      statusText.textContent = "🎙️ Ready";
+    };
+  </script>
 </body>
 </html>
