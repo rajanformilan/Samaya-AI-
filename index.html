@@ -1,76 +1,24 @@
 <!DOCTYPE html>
-<html lang="ne">
+<html lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samaya AI - Final Fix</title>
-    <style>
-        body { background: #000814; color: #00f0f0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .container { width: 90%; max-width: 450px; background: rgba(0, 255, 255, 0.05); border: 2px solid #00ffff55; border-radius: 20px; padding: 20px; box-shadow: 0 0 30px rgba(0, 255, 255, 0.2); }
-        #chat { height: 350px; overflow-y: auto; padding: 10px; margin-bottom: 20px; border-bottom: 1px solid #00ffff33; }
-        .msg { margin-bottom: 15px; padding: 12px; border-radius: 10px; font-size: 0.95rem; line-height: 1.5; }
-        .user { background: rgba(0, 255, 255, 0.15); text-align: right; color: #fff; border-right: 4px solid #00ffff; }
-        .ai { background: rgba(255, 255, 255, 0.05); border-left: 4px solid #00ffff; color: #00f0f0; }
-        .btn-container { text-align: center; }
-        button { background: linear-gradient(135deg, #00ffff, #008888); color: #000; border: none; padding: 15px 50px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px #00ffff; transition: 0.3s; }
-        button:active { transform: scale(0.95); }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Samaya - Human AI Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h2 style="text-align: center; letter-spacing: 3px;">SAMAYA AI</h2>
-        <div id="chat">
-            <div class="msg ai">Namaste! Naya Key set bhayo. Aba ma sathi jastai bolnechha. Chiya khanu bhayo? Sydney jane ki Hong Kong? Sodhnu hos!</div>
-        </div>
-        <div class="btn-container">
-            <button id="btn">🎙️ SPEAK</button>
-        </div>
+  <div class="container">
+    <div class="ai-image">
+      <img src="images.jpg" alt="Samaya" />
     </div>
-
-    <script>
-        // Tapai le diyeko naya Key
-        const API_KEY = "AIzaSyDkidNw7if6d0mcbimSMTYgqiv1ur4OUDY";
-        const btn = document.getElementById('btn');
-        const chat = document.getElementById('chat');
-
-        async function askAI(query) {
-            chat.innerHTML += `<div class="msg user">You: ${query}</div>`;
-            chat.scrollTop = chat.scrollHeight;
-
-            // Stable v1beta endpoint for Gemini 1.5 Flash
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-            
-            try {
-                const res = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `You are Samaya, a funny and smart Nepali AI friend. Answer like a real human. If asked 'chiya khayo', reply playfully. If asked about travel (Sydney vs Hong Kong) or NASA, give detailed point-wise advice in Nepali. User: ${query}` }] }]
-                    })
-                });
-                
-                const data = await res.json();
-                if (data.candidates && data.candidates[0].content) {
-                    const reply = data.candidates[0].content.parts[0].text;
-                    chat.innerHTML += `<div class="msg ai">Samaya: ${reply}</div>`;
-                    
-                    // Voice response
-                    const speech = new SpeechSynthesisUtterance(reply);
-                    speech.lang = 'ne-NP';
-                    window.speechSynthesis.speak(speech);
-                } else {
-                    chat.innerHTML += `<div class="msg ai" style="color:red">Samaya: Error aayo, Key check garnu parne bho.</div>`;
-                }
-            } catch (e) {
-                chat.innerHTML += `<div class="msg ai" style="color:red">Samaya: Connection failed!</div>`;
-            }
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        rec.lang = 'ne-NP';
-        btn.onclick = () => { window.speechSynthesis.cancel(); rec.start(); };
-        rec.onresult = (e) => askAI(e.results[0][0].transcript);
-    </script>
+    <div class="ai-name">SAMAYA</div>
+    <div class="chat-box" id="chatBox" aria-live="polite" aria-atomic="true">👋 Tap the mic and speak to Samaya...</div>
+    <div class="btn-container">
+      <button class="mic-btn" id="micBtn" aria-label="Speak to Samaya">🎙️ Speak</button>
+      <button class="stop-btn" id="stopBtn" aria-label="Stop Listening" style="display:none;">⏹️ Stop</button>
+    </div>
+    <div class="status" id="statusText">🎙️ Ready</div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
