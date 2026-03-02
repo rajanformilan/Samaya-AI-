@@ -127,6 +127,44 @@
     return "Internet ma samasya bhayeko jasto chha. Kripaya check garnu hos!";
   }
 }
+    async function getAIResponse(userInput) {
+    statusText.textContent = "🤔 Samaya is thinking...";
+    
+    // Google Gemini API URL
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    // Persona Setting: Yasle Samaya lai sanchikai intelligent banauchha
+    const promptData = {
+        contents: [{
+            parts: [{
+                text: `You are Samaya, a highly intelligent and helpful AI assistant. 
+                       Answer the user's questions accurately like a scientist. 
+                       If they ask about NASA, give professional advice. 
+                       Current Question: ${userInput}`
+            }]
+        }]
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(promptData)
+        });
+
+        const data = await response.json();
+        
+        // Response check garne
+        if (data.candidates && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text;
+        } else {
+            return "Maile tyo bisaya ma ajhai dherai sikna baaki chha. Kripaya arko prasna sodhnu hos.";
+        }
+    } catch (error) {
+        console.error("API Error:", error);
+        return "Connection ma samasya aayo. Kripaya internet check garnu hos.";
+    }
+    }
   </script>
 </body>
 </html>
