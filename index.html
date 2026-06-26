@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Samaya - Human AI Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="ai-image">
+      <img src="images.jpg" alt="Samaya" />
+    </div>
+
+    <div class="ai-name">SAMAYA</div>
+
+    <!-- च्याट बक्स: जहाँ तपाईंले बोलेको र समयाले लेखेको दुवै देखिन्छ -->
+    <div class="chat-box" id="chatBox" aria-live="polite" aria-atomic="true">
+      <div id="userText" style="color: #bbb; margin-bottom: 10px; font-style: italic;">👋 Tap the mic and speak to Samaya...</div>
+      <div id="aiResponse" style="color: #fff; font-weight: bold; line-height: 1.5;"></div>
+    </div>
+
+    <div class="btn-container">
+      <button class="mic-btn" id="micBtn" aria-label="Speak to Samaya">🎙️ Speak</button>
+      <button class="stop-btn" id="stopBtn" aria-label="Stop Listening" style="display:none;">⏹️ Stop</button>
+    </div>
+
+    <div class="status" id="statusText">🎙️ Ready</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
